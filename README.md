@@ -1,1 +1,3 @@
-tugas Pengembangan Aplikasi Terintegrasi A
+# tugas Pengembangan Aplikasi Terintegrasi A
+
+    npm install
