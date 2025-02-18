@@ -4,21 +4,24 @@ const sqlite3 = require("sqlite3").verbose();
 
 const db = new sqlite3.Database("./books.db", (err) => {
   if (err) {
-    console.error("Gagal terkoneksi ke database:", err.message);
+    console.error("failed connected to database", err.message);
   } else {
-    console.log("Terhubung ke database SQLite.");
+    console.log("success connected to database");
   }
 });
 
+// OPTIONS endpoint for /books: sets allowed HTTP methods in the response header
 router.options("/books", (req, res) => {
   res.setHeader("Allow", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS");
-  res.sendStatus(204); // 204 No Content
+  res.sendStatus(204);
 });
 
+// HEAD endpoint for /books: returns only headers (no response body)
 router.head("/books", (req, res) => {
   res.status(200).end();
 });
 
+// GET endpoint for /books: retrieves the list of all books
 router.get("/books", (req, res) => {
   const sql = "SELECT * FROM books";
   db.all(sql, [], (err, rows) => {
@@ -27,16 +30,13 @@ router.get("/books", (req, res) => {
       return;
     }
     res.status(200).json({
-      message: "Daftar buku berhasil diambil",
+      message: "Books list retrieved successfully",
       data: rows,
     });
   });
 });
 
-/**
- * GET /books/:id
- * Mengambil data buku berdasarkan ID
- */
+// GET endpoint for /books/:id: retrieves details of a specific book by id
 router.get("/books/:id", (req, res) => {
   const sql = "SELECT * FROM books WHERE id = ?";
   const id = req.params.id;
@@ -46,33 +46,24 @@ router.get("/books/:id", (req, res) => {
       return;
     }
     if (!row) {
-      res.status(404).json({ message: "Buku tidak ditemukan" });
+      res.status(404).json({ message: "Book not found" });
       return;
     }
     res.status(200).json({
-      message: "Buku berhasil diambil",
+      message: "Book retrieved successfully",
       data: row,
     });
   });
 });
 
-/**
- * POST /books
- * Menambahkan data buku baru
- * Body JSON wajib berisi:
- *   - title (string)
- *   - author (string)
- * Optional:
- *   - published_date (string)
- *   - description (string)
- */
+// POST endpoint for /books: creates a new book record
 router.post("/books", (req, res) => {
   const { title, author, published_date, description } = req.body;
   console.log(req);
 
   console.log(req.body);
   if (!title || !author) {
-    res.status(400).json({ message: "Field title dan author wajib diisi" });
+    res.status(400).json({ message: "Title and author fields are required" });
     return;
   }
   const sql =
@@ -83,7 +74,7 @@ router.post("/books", (req, res) => {
       return;
     }
     res.status(201).json({
-      message: "Buku berhasil dibuat",
+      message: "Book created successfully",
       data: {
         id: this.lastID,
         title,
@@ -95,12 +86,7 @@ router.post("/books", (req, res) => {
   });
 });
 
-/**
- * PUT /books/:id
- * Mengupdate seluruh data buku berdasarkan ID.
- * Wajib mengirim body JSON dengan field: title dan author.
- * Field published_date dan description bersifat opsional.
- */
+// PUT endpoint for /books/:id: updates an entire book record by id
 router.put("/books/:id", (req, res) => {
   const { title, author, published_date, description } = req.body;
   if (!title || !author) {
@@ -116,21 +102,17 @@ router.put("/books/:id", (req, res) => {
       return;
     }
     if (this.changes === 0) {
-      res.status(404).json({ message: "Buku tidak ditemukan" });
+      res.status(404).json({ message: "Book not found" });
       return;
     }
     res.status(200).json({
-      message: "Buku berhasil diupdate",
+      message: "Book updated successfully",
       data: { id: parseInt(id), title, author, published_date, description },
     });
   });
 });
 
-/**
- * PATCH /books/:id
- * Mengupdate sebagian data buku (partial update) berdasarkan ID.
- * Body JSON dapat berisi salah satu atau beberapa field: title, author, published_date, description.
- */
+// PATCH endpoint for /books/:id: partially updates a book record by id
 router.patch("/books/:id", (req, res) => {
   const id = req.params.id;
   const fields = [];
@@ -154,9 +136,7 @@ router.patch("/books/:id", (req, res) => {
   }
 
   if (fields.length === 0) {
-    res
-      .status(400)
-      .json({ message: "Tidak ada field yang valid untuk diupdate" });
+    res.status(400).json({ message: "No valid fields to update" });
     return;
   }
 
@@ -169,20 +149,17 @@ router.patch("/books/:id", (req, res) => {
       return;
     }
     if (this.changes === 0) {
-      res.status(404).json({ message: "Buku tidak ditemukan" });
+      res.status(404).json({ message: "Book not found" });
       return;
     }
     res.status(200).json({
-      message: "Buku berhasil diupdate (partial update)",
+      message: "Book partially updated successfully",
       data: { id: parseInt(id), ...req.body },
     });
   });
 });
 
-/**
- * DELETE /books/:id
- * Menghapus buku berdasarkan ID.
- */
+// DELETE endpoint for /books/:id: deletes a book record by id
 router.delete("/books/:id", (req, res) => {
   const id = req.params.id;
   const sql = "DELETE FROM books WHERE id = ?";
@@ -192,11 +169,11 @@ router.delete("/books/:id", (req, res) => {
       return;
     }
     if (this.changes === 0) {
-      res.status(404).json({ message: "Buku tidak ditemukan" });
+      res.status(404).json({ message: "Book not found" });
       return;
     }
     res.status(200).json({
-      message: "Buku berhasil dihapus",
+      message: "Book deleted successfully",
     });
   });
 });

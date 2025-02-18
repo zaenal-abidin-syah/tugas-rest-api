@@ -8,8 +8,6 @@ const routes = require("./routes");
 // Middleware untuk parsing JSON
 app.use(express.json());
 
-// Menjalankan server
-
 app.use("/api", routes);
 
 app.listen(port, () => {
