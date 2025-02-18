@@ -1,6 +1,6 @@
 # tugas Pengembangan Aplikasi Terintegrasi A
 
-### menginstall dependensi / library express dan mysql
+### menginstall dependensi / library express dan sqllite
 
     npm install
 
